@@ -12,7 +12,7 @@ services:
       POSTGRES_PASSWORD: tcg_password
       POSTGRES_DB: tcg_database
     ports:
-      - "5432:5432"
+      - "5433:5432" # Changement du port pour éviter les conflits avec d'autres services
     volumes:
       - .cache/postgres:/var/lib/postgresql/data
     healthcheck:
