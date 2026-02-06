@@ -3,6 +3,7 @@ import {env} from "./env";
 import express from "express";
 import cors from "cors";
 import {authRouter} from "./routes/auth.routes";
+import {cardsRouter} from "./routes/cards.routes";
 
 // Create Express app
 export const app = express();
@@ -23,6 +24,9 @@ app.use(express.static("public"));
 
 // Auth routes
 app.use("/api/auth", authRouter);
+
+// Cards routes
+app.use("/api/cards", cardsRouter);
 
 // Health check endpoint
 app.get("/api/health", (_req, res) => {
