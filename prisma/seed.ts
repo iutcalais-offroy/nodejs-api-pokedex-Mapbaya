@@ -6,10 +6,12 @@ import {CardModel} from "../src/generated/prisma/models/Card";
 import {PokemonType} from "../src/generated/prisma/enums";
 
 async function main() {
-    console.log("🌱 Starting database seed...");
+    console.log("Starting database seed...");
 
     await prisma.card.deleteMany();
     await prisma.user.deleteMany();
+    await prisma.deckCard.deleteMany();
+    await prisma.deck.deleteMany();
 
     const hashedPassword = await bcrypt.hash("password123", 10);
 
@@ -35,7 +37,7 @@ async function main() {
         throw new Error("Failed to create users");
     }
 
-    console.log("✅ Created users:", redUser.username, blueUser.username);
+    console.log("Created users:", redUser.username, blueUser.username);
 
     const pokemonDataPath = join(__dirname, "data", "pokemon.json");
     const pokemonJson = readFileSync(pokemonDataPath, "utf-8");
@@ -56,9 +58,51 @@ async function main() {
         )
     );
 
-    console.log(`✅ Created ${pokemonData.length} Pokemon cards`);
+    console.log(`Created ${pokemonData.length} Pokemon cards`);
 
-    console.log("\n🎉 Database seeding completed!");
+    // Fonction générique pour sélectionner aléatoirement un certain nombre de cartes
+    function getRandomCards<T>(cards: T[], count: number): T[] {
+        const shuffled = [...cards].sort(() => Math.random() - 0.5);
+        return shuffled.slice(0, count);
+    }
+
+    // Créer un deck "Starter Deck" pour red
+    const redDeck = await prisma.deck.create({
+        data: {
+            name: "Starter Deck",
+            userId: redUser.id,
+        },
+    });
+
+    const redCards = getRandomCards(createdCards, 10);
+    await prisma.deckCard.createMany({
+        data: redCards.map((card) => ({
+            deckId: redDeck.id,
+            cardId: card.id,
+        })),
+    });
+
+    console.log(`Created "Starter Deck" for ${redUser.username} with 10 cards`);
+
+    // Créer un deck "Starter Deck" pour blue
+    const blueDeck = await prisma.deck.create({
+        data: {
+            name: "Starter Deck",
+            userId: blueUser.id,
+        },
+    });
+
+    const blueCards = getRandomCards(createdCards, 10);
+    await prisma.deckCard.createMany({
+        data: blueCards.map((card) => ({
+            deckId: blueDeck.id,
+            cardId: card.id,
+        })),
+    });
+
+    console.log(`Created "Starter Deck" for ${blueUser.username} with 10 cards`);
+
+    console.log("Database seeding completed.");
 }
 
 main()
