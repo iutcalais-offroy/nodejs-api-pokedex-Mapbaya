@@ -2,6 +2,7 @@ import {createServer} from "http";
 import {env} from "./env";
 import express from "express";
 import cors from "cors";
+import {authRouter} from "./routes/auth.routes";
 
 // Create Express app
 export const app = express();
@@ -14,10 +15,14 @@ app.use(
     }),
 );
 
+// Middleware pour parser le JSON dans le body
 app.use(express.json());
 
-// Serve static files (Socket.io test client)
-app.use(express.static('public'));
+// Sert les fichiers statiques du dossier public
+app.use(express.static("public"));
+
+// Auth routes
+app.use("/api/auth", authRouter);
 
 // Health check endpoint
 app.get("/api/health", (_req, res) => {
