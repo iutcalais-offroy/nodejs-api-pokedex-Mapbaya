@@ -6,7 +6,13 @@ import {authMiddleware} from "../middlewares/auth.middleware";
 // Router pour les routes liées aux cartes
 const cardsRouter = Router();
 
-// GET /api/cards : retourne toutes les cartes triées par numéro de Pokédex
+/**
+ * Retourne toutes les cartes Pokémon triées par numéro de Pokédex
+ * @route GET /api/cards
+ * @returns 200 avec la liste complète des cartes triées par pokedexNumber croissant
+ * @throws {401} Si le token d'authentification est manquant ou invalide
+ * @throws {500} En cas d'erreur serveur
+ */
 cardsRouter.get("/", authMiddleware, async (_req: Request, res: Response) => {
     try {
         const cards = await prisma.card.findMany({

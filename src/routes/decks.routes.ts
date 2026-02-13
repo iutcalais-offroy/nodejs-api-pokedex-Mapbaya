@@ -15,7 +15,16 @@ interface UpdateDeckBody {
     cards?: number[];
 }
 
-// Va créer un nouveau deck
+/**
+ * Crée un nouveau deck pour l'utilisateur authentifié
+ * @route POST /api/decks
+ * @param req.body.name - Le nom du deck
+ * @param req.body.cards - Un tableau de 10 IDs de cartes valides
+ * @returns 201 avec le deck créé et ses cartes
+ * @throws {401} Si le token d'authentification est manquant ou invalide
+ * @throws {400} Si le nom est manquant, si le nombre de cartes n'est pas 10, ou si certaines cartes sont invalides
+ * @throws {500} En cas d'erreur serveur
+ */
 decksRouter.post("/", authMiddleware, async (req: Request, res: Response) => {
     try {
         const {name, cards} = req.body as CreateDeckBody;
@@ -83,7 +92,13 @@ decksRouter.post("/", authMiddleware, async (req: Request, res: Response) => {
     }
 });
 
-// Va lister tous les decks de l'utilisateur connecté
+/**
+ * Liste tous les decks de l'utilisateur authentifié
+ * @route GET /api/decks/mine
+ * @returns 200 avec la liste des decks de l'utilisateur (peut être vide)
+ * @throws {401} Si le token d'authentification est manquant ou invalide
+ * @throws {500} En cas d'erreur serveur
+ */
 decksRouter.get("/mine", authMiddleware, async (req: Request, res: Response) => {
     try {
         const userId = req.user?.userId;
@@ -116,7 +131,17 @@ decksRouter.get("/mine", authMiddleware, async (req: Request, res: Response) => 
     }
 });
 
-// Va consulter un deck spécifique
+/**
+ * Consulte un deck spécifique par son ID
+ * @route GET /api/decks/:id
+ * @param req.params.id - L'ID du deck à consulter
+ * @returns 200 avec le deck et ses cartes si l'utilisateur en est propriétaire
+ * @throws {401} Si le token d'authentification est manquant ou invalide
+ * @throws {400} Si l'ID du deck est invalide
+ * @throws {403} Si le deck n'appartient pas à l'utilisateur authentifié
+ * @throws {404} Si le deck n'existe pas
+ * @throws {500} En cas d'erreur serveur
+ */
 decksRouter.get("/:id", authMiddleware, async (req: Request, res: Response) => {
     try {
         const deckId = parseInt(req.params.id, 10);
@@ -168,7 +193,19 @@ decksRouter.get("/:id", authMiddleware, async (req: Request, res: Response) => {
     }
 });
 
-// Va modifier un deck
+/**
+ * Modifie un deck existant (nom et/ou cartes)
+ * @route PATCH /api/decks/:id
+ * @param req.params.id - L'ID du deck à modifier
+ * @param req.body.name - Le nouveau nom du deck (optionnel)
+ * @param req.body.cards - Un nouveau tableau de 10 IDs de cartes (optionnel)
+ * @returns 200 avec le deck modifié et ses cartes
+ * @throws {401} Si le token d'authentification est manquant ou invalide
+ * @throws {400} Si l'ID est invalide, si le nombre de cartes n'est pas 10, ou si certaines cartes sont invalides
+ * @throws {403} Si le deck n'appartient pas à l'utilisateur authentifié
+ * @throws {404} Si le deck n'existe pas
+ * @throws {500} En cas d'erreur serveur
+ */
 decksRouter.patch("/:id", authMiddleware, async (req: Request, res: Response) => {
     try {
         const deckId = parseInt(req.params.id, 10);
@@ -277,7 +314,17 @@ decksRouter.patch("/:id", authMiddleware, async (req: Request, res: Response) =>
     }
 });
 
-// Va supprimer un deck
+/**
+ * Supprime un deck et toutes ses associations de cartes
+ * @route DELETE /api/decks/:id
+ * @param req.params.id - L'ID du deck à supprimer
+ * @returns 200 avec un message de confirmation
+ * @throws {401} Si le token d'authentification est manquant ou invalide
+ * @throws {400} Si l'ID du deck est invalide
+ * @throws {403} Si le deck n'appartient pas à l'utilisateur authentifié
+ * @throws {404} Si le deck n'existe pas
+ * @throws {500} En cas d'erreur serveur
+ */
 decksRouter.delete("/:id", authMiddleware, async (req: Request, res: Response) => {
     try {
         const deckId = parseInt(req.params.id, 10);

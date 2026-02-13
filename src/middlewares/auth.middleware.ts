@@ -11,7 +11,14 @@ interface JwtPayload {
     exp?: number;
 }
 
-// Middleware appelé sur les routes protégées
+/**
+ * Middleware d'authentification JWT pour protéger les routes
+ * Vérifie le token dans le header Authorization et injecte les infos utilisateur dans req.user
+ * @param req - La requête Express
+ * @param res - La réponse Express
+ * @param next - La fonction next pour passer au middleware suivant
+ * @throws {401} Si le token est manquant, invalide ou expiré
+ */
 export function authMiddleware(req: Request, res: Response, next: NextFunction): void {
     // On récupère le header Authorization
     const authHeader = req.header("Authorization");

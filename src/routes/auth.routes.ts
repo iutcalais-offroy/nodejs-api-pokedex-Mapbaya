@@ -27,12 +27,26 @@ interface JwtPayload {
     email: string;
 }
 
-// Fonction qui génère un token JWT valide 7 jours
+/**
+ * Génère un token JWT valide pendant 7 jours
+ * @param payload - Les données à mettre dans le token (userId et email)
+ * @returns Le token JWT sous forme de string
+ */
 function createToken(payload: JwtPayload): string {
     return jwt.sign(payload, env.JWT_SECRET, {expiresIn: "7d"});
 }
 
-// Route pour créer un nouveau compte utilisateur
+/**
+ * Crée un nouveau compte utilisateur avec authentification JWT
+ * @route POST /api/auth/sign-up
+ * @param req.body.email - L'email de l'utilisateur
+ * @param req.body.username - Le nom d'utilisateur
+ * @param req.body.password - Le mot de passe en clair (sera hashé)
+ * @returns 201 avec le token JWT et les infos utilisateur (sans mot de passe)
+ * @throws {400} Si des données sont manquantes
+ * @throws {409} Si l'email est déjà utilisé
+ * @throws {500} En cas d'erreur serveur
+ */
 authRouter.post("/sign-up", async (req: Request, res: Response) => {
     try {
         const {email, username, password} = req.body as SignUpBody;
@@ -87,7 +101,16 @@ authRouter.post("/sign-up", async (req: Request, res: Response) => {
     }
 });
 
-// Route pour se connecter avec un compte existant
+/**
+ * Connecte un utilisateur existant et génère un token JWT
+ * @route POST /api/auth/sign-in
+ * @param req.body.email - L'email de l'utilisateur
+ * @param req.body.password - Le mot de passe en clair
+ * @returns 200 avec le token JWT et les infos utilisateur (sans mot de passe)
+ * @throws {400} Si l'email ou le mot de passe sont manquants
+ * @throws {401} Si l'email n'existe pas ou le mot de passe est incorrect
+ * @throws {500} En cas d'erreur serveur
+ */
 authRouter.post("/sign-in", async (req: Request, res: Response) => {
     try {
         const {email, password} = req.body as SignInBody;
