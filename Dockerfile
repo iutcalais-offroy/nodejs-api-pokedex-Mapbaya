@@ -36,6 +36,8 @@ COPY --from=builder /app/src/generated ./src/generated
 
 # Copy Prisma schema, config, and data for migrations and seed
 COPY --from=builder /app/prisma ./prisma
+# Explicitly copy prisma/data to ensure pokemon.json is included
+COPY --from=builder /app/prisma/data ./prisma/data
 COPY prisma.config.ts ./
 
 # Copy public directory for static files
