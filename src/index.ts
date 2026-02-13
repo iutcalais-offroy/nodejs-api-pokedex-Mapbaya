@@ -32,6 +32,20 @@ app.use('/api/cards', cardsRouter)
 // Decks routes
 app.use('/api/decks', decksRouter)
 
+// Root endpoint pour y accéder par docker compose
+app.get('/', (_req, res) => {
+  res.json({
+    message: 'TCG Backend API',
+    version: '1.0.0',
+    endpoints: {
+      health: '/api/health',
+      auth: '/api/auth',
+      cards: '/api/cards',
+      decks: '/api/decks',
+    },
+  })
+})
+
 // Health check endpoint
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', message: 'TCG Backend Server is running' })
@@ -44,10 +58,10 @@ if (require.main === module) {
 
   // Start server
   try {
-    httpServer.listen(env.PORT, () => {
-      console.log(`\n🚀 Server is running on http://localhost:${env.PORT}`)
+    httpServer.listen(env.PORT, '0.0.0.0', () => {
+      console.log(`\n🚀 Server is running on http://0.0.0.0:${env.PORT}`)
       console.log(
-        `🧪 Socket.io Test Client available at http://localhost:${env.PORT}`,
+        `🧪 Socket.io Test Client available at http://0.0.0.0:${env.PORT}`,
       )
     })
   } catch (error) {

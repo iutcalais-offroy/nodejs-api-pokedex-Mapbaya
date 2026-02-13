@@ -6,9 +6,9 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
+    "build": "prisma generate && tsc",
     "ts:check": "tsc --noEmit",
-    "start": "node dist/index.js",
+    "start": "prisma migrate deploy && node dist/index.js",
     "test": "vitest --coverage --run",
     "test:ui": "vitest --ui",
     "lint": "eslint .",
@@ -22,7 +22,7 @@
     "db:studio": "prisma studio",
     "db:seed": "npm run db:generate && tsx prisma/seed.ts",
     "db:reset": "npm run db:generate && prisma migrate reset --force && npm run db:seed",
-    "prepare": "husky"
+    "prepare": "husky || true"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.1.0",
@@ -39,6 +39,9 @@
     "socket.io": "4.6.1",
     "swagger-ui-express": "5.0.1",
     "uuid": "13.0.0"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.4.1",
@@ -62,7 +65,6 @@
     "husky": "^9.1.7",
     "prettier": "^3.8.1",
     "supertest": "7.0.0",
-    "tsx": "4.7.0",
     "typescript": "5.4.5",
     "typescript-eslint": "^8.55.0",
     "vite-tsconfig-paths": "5.1.4",
