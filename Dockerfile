@@ -34,9 +34,12 @@ COPY --from=builder /app/src/generated ./src/generated
 # Note: @prisma/client is already in production dependencies, so it will be installed
 # The generated Prisma client is in src/generated/prisma
 
-# Copy Prisma schema and config for migrations
+# Copy Prisma schema, config, and data for migrations and seed
 COPY prisma ./prisma
 COPY prisma.config.ts ./
+
+# Copy public directory for static files
+COPY public ./public
 
 # Expose port
 EXPOSE 3000
