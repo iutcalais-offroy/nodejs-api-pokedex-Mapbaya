@@ -35,10 +35,11 @@ COPY --from=builder /app/src/generated ./src/generated
 # The generated Prisma client is in src/generated/prisma
 
 # Copy Prisma schema, config, and data for migrations and seed
+# Copy entire prisma directory from builder (includes data folder)
 COPY --from=builder /app/prisma ./prisma
-# Ensure prisma/data directory exists and copy pokemon.json
-RUN mkdir -p ./prisma/data
-COPY prisma/data/pokemon.json ./prisma/data/pokemon.json
+# Verify prisma/data exists (debug)
+RUN ls -la ./prisma/data/ || echo "prisma/data directory not found"
+RUN ls -la ./prisma/data/pokemon.json || echo "pokemon.json not found"
 COPY prisma.config.ts ./
 
 # Copy public directory for static files
