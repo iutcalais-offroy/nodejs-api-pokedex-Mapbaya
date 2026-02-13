@@ -37,6 +37,8 @@ COPY --from=builder /app/src/generated ./src/generated
 # Copy Prisma schema, config, and data for migrations and seed
 COPY prisma ./prisma
 COPY prisma.config.ts ./
+# Ensure prisma/data is copied for seed
+COPY prisma/data ./prisma/data
 
 # Copy public directory for static files
 COPY public ./public
