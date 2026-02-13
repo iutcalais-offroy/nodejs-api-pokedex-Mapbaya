@@ -1,7 +1,18 @@
 import bcrypt from 'bcryptjs'
 import { readFileSync } from 'fs'
 import { join } from 'path'
-import { prisma } from '../src/database'
+import { PrismaClient } from '../src/generated/prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
+import dotenv from 'dotenv'
+
+dotenv.config()
+
+// Create Prisma client for seed
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL,
+})
+const prisma = new PrismaClient({ adapter })
+
 import { CardModel } from '../src/generated/prisma/models/Card'
 import { PokemonType } from '../src/generated/prisma/enums'
 
