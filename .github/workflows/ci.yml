@@ -32,6 +32,8 @@ jobs:
 
       - name: Generate Prisma client
         run: npm run db:generate
+        env:
+          DATABASE_URL: postgresql://user:password@localhost:5432/db
 
       - name: Run type checking
         run: npm run ts:check
