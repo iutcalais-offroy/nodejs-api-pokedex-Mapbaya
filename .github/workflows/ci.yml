@@ -30,6 +30,9 @@ jobs:
       - name: Check code formatting
         run: npm run format:check
 
+      - name: Generate Prisma client
+        run: npm run db:generate
+
       - name: Run type checking
         run: npm run ts:check
 
