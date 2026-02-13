@@ -54,7 +54,30 @@ async function main() {
 
   console.log('Created users:', redUser.username, blueUser.username)
 
-  const pokemonDataPath = join(__dirname, 'data', 'pokemon.json')
+  // Try multiple paths for pokemon.json (works in both local and Docker environments)
+  const possiblePaths = [
+    join(__dirname, 'data', 'pokemon.json'),
+    join(process.cwd(), 'prisma', 'data', 'pokemon.json'),
+    join(process.cwd(), 'data', 'pokemon.json'),
+  ]
+  
+  let pokemonDataPath: string | null = null
+  for (const path of possiblePaths) {
+    try {
+      readFileSync(path, 'utf-8')
+      pokemonDataPath = path
+      break
+    } catch {
+      // Continue to next path
+    }
+  }
+  
+  if (!pokemonDataPath) {
+    throw new Error(
+      `pokemon.json not found. Tried: ${possiblePaths.join(', ')}`,
+    )
+  }
+  
   const pokemonJson = readFileSync(pokemonDataPath, 'utf-8')
   const pokemonData: CardModel[] = JSON.parse(pokemonJson)
 
