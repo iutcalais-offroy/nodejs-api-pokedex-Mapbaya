@@ -4,19 +4,45 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: tcg_postgres
-    restart: no
-    env_file:
-      - .env
+    restart: unless-stopped
     environment:
       POSTGRES_USER: tcg_user
       POSTGRES_PASSWORD: tcg_password
       POSTGRES_DB: tcg_database
     ports:
-      - "5433:5432" # Changement du port pour éviter les conflits avec d'autres services
+      - "5433:5432"
     volumes:
-      - .cache/postgres:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U tcg_user -d tcg_database" ]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - tcg_network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tcg_api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://tcg_user:tcg_password@postgres:5432/tcg_database
+      JWT_SECRET: ${JWT_SECRET:-default-secret-change-in-production}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - tcg_network
+
+volumes:
+  postgres_data:
+
+networks:
+  tcg_network:
+    driver: bridge

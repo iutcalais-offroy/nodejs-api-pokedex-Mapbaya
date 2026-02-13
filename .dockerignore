@@ -1,0 +1,17 @@
+node_modules
+dist
+build
+coverage
+.env
+.env.local
+.git
+.gitignore
+.vscode
+.idea
+*.log
+.cache
+tests
+.DS_Store
+*.md
+.eslintignore
+.prettierignore
