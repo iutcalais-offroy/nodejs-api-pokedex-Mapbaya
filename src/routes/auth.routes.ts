@@ -85,6 +85,7 @@ authRouter.post('/sign-up', async (req: Request, res: Response) => {
     const token = createToken({ userId: user.id, email: user.email })
 
     // On enlève le mot de passe avant de renvoyer l'utilisateur au client
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _password, ...userWithoutPassword } = user
 
     // Renvoie 201 avec le token et les infos utilisateur (sans mot de passe)
@@ -148,6 +149,7 @@ authRouter.post('/sign-in', async (req: Request, res: Response) => {
     const token = createToken({ userId: user.id, email: user.email })
 
     // On enlève le mot de passe avant de renvoyer l'utilisateur au client
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _password, ...userWithoutPassword } = user
 
     // Renvoie 200 avec le token et les infos utilisateur (sans mot de passe)

@@ -49,7 +49,7 @@ export function authMiddleware(
     }
 
     next()
-  } catch (error) {
+  } catch {
     // Si le token est invalide ou expiré, on renvoie 401
     res
       .status(StatusCodes.UNAUTHORIZED)

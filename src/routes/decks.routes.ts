@@ -25,7 +25,7 @@ interface UpdateDeckBody {
  * @throws {400} Si le nom est manquant, si le nombre de cartes n'est pas 10, ou si certaines cartes sont invalides
  * @throws {500} En cas d'erreur serveur
  */
-decksRouter.post('/', authMiddleware, async (req: any, res: Response) => {
+decksRouter.post('/', authMiddleware, async (req: Request, res: Response) => {
   try {
     const { name, cards } = req.body as CreateDeckBody
     const userId = req.user?.userId
