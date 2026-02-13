@@ -35,10 +35,8 @@ COPY --from=builder /app/src/generated ./src/generated
 # The generated Prisma client is in src/generated/prisma
 
 # Copy Prisma schema, config, and data for migrations and seed
-COPY prisma ./prisma
+COPY --from=builder /app/prisma ./prisma
 COPY prisma.config.ts ./
-# Ensure prisma/data is copied for seed
-COPY prisma/data ./prisma/data
 
 # Copy public directory for static files
 COPY public ./public
