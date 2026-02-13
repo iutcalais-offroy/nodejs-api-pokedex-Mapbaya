@@ -50,15 +50,7 @@ describe('GET /api/cards', () => {
     // Mock Prisma : retourner les cartes triées
     prismaMock.card.findMany.mockResolvedValue(mockCards)
 
-    // Mock jwt : vérifier le token
-    vi.mocked(jwt.verify).mockReturnValue({
-      userId: 1,
-      email: 'test@example.com',
-    } as never)
-
-    const response = await request(app)
-      .get('/api/cards')
-      .set('Authorization', 'Bearer fake_token')
+    const response = await request(app).get('/api/cards')
 
     expect(response.status).toBe(200)
     expect(response.body.length).toBe(2)
@@ -93,40 +85,11 @@ describe('GET /api/cards', () => {
     expect(response.body).toEqual([])
   })
 
-  it("devrait retourner 401 si aucun token n'est fourni", async () => {
-    const response = await request(app).get('/api/cards')
-
-    expect(response.status).toBe(401)
-    expect(response.body).toHaveProperty('error')
-  })
-
-  it('devrait retourner 401 si le token est invalide', async () => {
-    // Mock jwt : token invalide
-    vi.mocked(jwt.verify).mockImplementation(() => {
-      throw new Error('Invalid token')
-    })
-
-    const response = await request(app)
-      .get('/api/cards')
-      .set('Authorization', 'Bearer invalid_token')
-
-    expect(response.status).toBe(401)
-    expect(response.body).toHaveProperty('error')
-  })
-
   it("devrait retourner 500 en cas d'erreur serveur", async () => {
     // Mock Prisma : simuler une erreur
     prismaMock.card.findMany.mockRejectedValue(new Error('Database error'))
 
-    // Mock jwt : vérifier le token
-    vi.mocked(jwt.verify).mockReturnValue({
-      userId: 1,
-      email: 'test@example.com',
-    } as never)
-
-    const response = await request(app)
-      .get('/api/cards')
-      .set('Authorization', 'Bearer fake_token')
+    const response = await request(app).get('/api/cards')
 
     expect(response.status).toBe(500)
     expect(response.body).toHaveProperty('error')
