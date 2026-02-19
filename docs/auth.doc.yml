@@ -1,0 +1,149 @@
+paths:
+  /api/auth/sign-up:
+    post:
+      tags:
+        - auth
+      summary: Créer un nouveau compte utilisateur
+      description: |
+        Crée un nouveau compte utilisateur avec authentification JWT.
+        Le mot de passe sera automatiquement hashé avant stockage.
+        Retourne un token JWT valide pendant 7 jours.
+      operationId: signUp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignUpRequest'
+            examples:
+              default:
+                summary: Exemple de création de compte
+                value:
+                  email: red@example.com
+                  username: red
+                  password: password123
+      responses:
+        '201':
+          description: Compte créé avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+              examples:
+                default:
+                  summary: Réponse de création de compte
+                  value:
+                    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                    user:
+                      id: 1
+                      username: red
+                      email: red@example.com
+                      createdAt: '2024-01-15T10:30:00Z'
+                      updatedAt: '2024-01-15T10:30:00Z'
+        '400':
+          description: Données manquantes ou invalides
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                missingFields:
+                  summary: Champs manquants
+                  value:
+                    error: 'email, username and password are required'
+        '409':
+          description: Email déjà utilisé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                emailExists:
+                  summary: Email déjà utilisé
+                  value:
+                    error: 'Email is already used'
+        '500':
+          description: Erreur serveur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                serverError:
+                  summary: Erreur serveur
+                  value:
+                    error: 'Internal server error'
+
+  /api/auth/sign-in:
+    post:
+      tags:
+        - auth
+      summary: Se connecter avec un compte existant
+      description: |
+        Connecte un utilisateur existant et génère un token JWT.
+        Le token est valide pendant 7 jours et doit être utilisé
+        dans l'en-tête Authorization pour accéder aux routes protégées.
+      operationId: signIn
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignInRequest'
+            examples:
+              default:
+                summary: Exemple de connexion
+                value:
+                  email: red@example.com
+                  password: password123
+      responses:
+        '200':
+          description: Connexion réussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+              examples:
+                default:
+                  summary: Réponse de connexion
+                  value:
+                    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                    user:
+                      id: 1
+                      username: red
+                      email: red@example.com
+                      createdAt: '2024-01-15T10:30:00Z'
+                      updatedAt: '2024-01-15T10:30:00Z'
+        '400':
+          description: Email ou mot de passe manquant
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                missingFields:
+                  summary: Champs manquants
+                  value:
+                    error: 'email and password are required'
+        '401':
+          description: Email ou mot de passe incorrect
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalidCredentials:
+                  summary: Identifiants invalides
+                  value:
+                    error: 'Invalid email or password'
+        '500':
+          description: Erreur serveur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                serverError:
+                  summary: Erreur serveur
+                  value:
+                    error: 'Internal server error'

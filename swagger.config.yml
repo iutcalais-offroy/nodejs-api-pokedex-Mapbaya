@@ -1,0 +1,314 @@
+openapi: 3.0.0
+info:
+  title: TCG Backend API
+  version: 1.0.0
+  description: API REST pour le jeu de cartes Pokémon TCG
+  contact:
+    name: Support API
+    email: support@tcg-api.com
+
+servers:
+  - url: http://localhost:3001
+    description: Serveur de développement local
+  - url: https://nodejs-api-pokedex-mapbaya-production.up.railway.app
+    description: Serveur de production Railway
+
+tags:
+  - name: auth
+    description: Authentification et gestion des utilisateurs
+  - name: cards
+    description: Gestion des cartes Pokémon
+  - name: decks
+    description: Gestion des decks de cartes
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT obtenu via /api/auth/sign-in ou /api/auth/sign-up
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Identifiant unique de l'utilisateur
+          example: 1
+        username:
+          type: string
+          description: Nom d'utilisateur unique
+          example: red
+        email:
+          type: string
+          format: email
+          description: Adresse email unique
+          example: red@example.com
+        createdAt:
+          type: string
+          format: date-time
+          description: Date de création du compte
+          example: '2024-01-15T10:30:00Z'
+        updatedAt:
+          type: string
+          format: date-time
+          description: Date de dernière mise à jour
+          example: '2024-01-15T10:30:00Z'
+      required:
+        - id
+        - username
+        - email
+        - createdAt
+        - updatedAt
+
+    Card:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Identifiant unique de la carte
+          example: 1
+        name:
+          type: string
+          description: Nom du Pokémon
+          example: Bulbasaur
+        hp:
+          type: integer
+          description: Points de vie
+          example: 45
+        attack:
+          type: integer
+          description: Points d'attaque
+          example: 49
+        type:
+          type: string
+          enum:
+            - Normal
+            - Fire
+            - Water
+            - Electric
+            - Grass
+            - Ice
+            - Fighting
+            - Poison
+            - Ground
+            - Flying
+            - Psychic
+            - Bug
+            - Rock
+            - Ghost
+            - Dragon
+            - Dark
+            - Steel
+            - Fairy
+          description: Type du Pokémon
+          example: Grass
+        pokedexNumber:
+          type: integer
+          description: Numéro dans le Pokédex
+          example: 1
+        imgUrl:
+          type: string
+          nullable: true
+          description: URL de l'image du Pokémon
+          example: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png'
+        createdAt:
+          type: string
+          format: date-time
+          description: Date de création
+          example: '2024-01-15T10:30:00Z'
+        updatedAt:
+          type: string
+          format: date-time
+          description: Date de dernière mise à jour
+          example: '2024-01-15T10:30:00Z'
+      required:
+        - id
+        - name
+        - hp
+        - attack
+        - type
+        - pokedexNumber
+        - createdAt
+        - updatedAt
+
+    DeckCard:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Identifiant unique de l'association
+          example: 1
+        deckId:
+          type: integer
+          description: Identifiant du deck
+          example: 1
+        cardId:
+          type: integer
+          description: Identifiant de la carte
+          example: 1
+        card:
+          $ref: '#/components/schemas/Card'
+        createdAt:
+          type: string
+          format: date-time
+          description: Date de création
+          example: '2024-01-15T10:30:00Z'
+        updatedAt:
+          type: string
+          format: date-time
+          description: Date de dernière mise à jour
+          example: '2024-01-15T10:30:00Z'
+      required:
+        - id
+        - deckId
+        - cardId
+        - createdAt
+        - updatedAt
+
+    Deck:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Identifiant unique du deck
+          example: 1
+        name:
+          type: string
+          description: Nom du deck
+          example: Mon premier deck
+        userId:
+          type: integer
+          description: Identifiant du propriétaire du deck
+          example: 1
+        deckCards:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeckCard'
+          description: Liste des cartes dans le deck (10 cartes)
+        createdAt:
+          type: string
+          format: date-time
+          description: Date de création
+          example: '2024-01-15T10:30:00Z'
+        updatedAt:
+          type: string
+          format: date-time
+          description: Date de dernière mise à jour
+          example: '2024-01-15T10:30:00Z'
+      required:
+        - id
+        - name
+        - userId
+        - deckCards
+        - createdAt
+        - updatedAt
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Message d'erreur
+          example: 'Une erreur est survenue'
+      required:
+        - error
+
+    SignUpRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          description: Adresse email de l'utilisateur
+          example: red@example.com
+        username:
+          type: string
+          description: Nom d'utilisateur unique
+          example: red
+        password:
+          type: string
+          format: password
+          description: Mot de passe en clair (sera hashé)
+          example: password123
+      required:
+        - email
+        - username
+        - password
+
+    SignInRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          description: Adresse email de l'utilisateur
+          example: red@example.com
+        password:
+          type: string
+          format: password
+          description: Mot de passe en clair
+          example: password123
+      required:
+        - email
+        - password
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Token JWT valide pendant 7 jours
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        user:
+          $ref: '#/components/schemas/User'
+      required:
+        - token
+        - user
+
+    CreateDeckRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nom du deck
+          example: Mon premier deck
+        cards:
+          type: array
+          items:
+            type: integer
+          minItems: 10
+          maxItems: 10
+          description: Tableau de 10 IDs de cartes valides
+          example: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+      required:
+        - name
+        - cards
+
+    UpdateDeckRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nouveau nom du deck (optionnel)
+          example: Mon deck modifié
+        cards:
+          type: array
+          items:
+            type: integer
+          minItems: 10
+          maxItems: 10
+          description: Nouveau tableau de 10 IDs de cartes (optionnel)
+          example: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+    DeleteDeckResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Message de confirmation
+          example: 'Le deck a été supprimé avec succès'
+      required:
+        - message

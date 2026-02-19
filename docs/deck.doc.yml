@@ -1,0 +1,453 @@
+paths:
+  /api/decks:
+    post:
+      tags:
+        - decks
+      summary: Créer un nouveau deck
+      description: |
+        Crée un nouveau deck pour l'utilisateur authentifié.
+        Le deck doit contenir exactement 10 cartes valides.
+        Toutes les cartes doivent exister dans la base de données.
+      operationId: createDeck
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDeckRequest'
+            examples:
+              default:
+                summary: Exemple de création de deck
+                value:
+                  name: Mon premier deck
+                  cards: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+      responses:
+        '201':
+          description: Deck créé avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deck'
+              examples:
+                default:
+                  summary: Deck créé
+                  value:
+                    id: 1
+                    name: Mon premier deck
+                    userId: 1
+                    deckCards:
+                      - id: 1
+                        deckId: 1
+                        cardId: 1
+                        card:
+                          id: 1
+                          name: Bulbasaur
+                          hp: 45
+                          attack: 49
+                          type: Grass
+                          pokedexNumber: 1
+                          imgUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png'
+                          createdAt: '2024-01-15T10:30:00Z'
+                          updatedAt: '2024-01-15T10:30:00Z'
+                        createdAt: '2024-01-15T10:30:00Z'
+                        updatedAt: '2024-01-15T10:30:00Z'
+                    createdAt: '2024-01-15T10:30:00Z'
+                    updatedAt: '2024-01-15T10:30:00Z'
+        '400':
+          description: Données invalides
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                missingName:
+                  summary: Nom manquant
+                  value:
+                    error: 'Le nom est requis'
+                wrongCardCount:
+                  summary: Nombre de cartes incorrect
+                  value:
+                    error: 'Les cartes doivent contenir exactement 10 IDs'
+                invalidCards:
+                  summary: Cartes invalides
+                  value:
+                    error: "Certaines cartes sont invalides ou n'existent pas"
+        '401':
+          description: Token d'authentification manquant ou invalide
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                unauthorized:
+                  summary: Non autorisé
+                  value:
+                    error: "Vous n'êtes pas autorisé à accéder à cette route"
+        '500':
+          description: Erreur serveur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                serverError:
+                  summary: Erreur serveur
+                  value:
+                    error: 'Une erreur est survenue lors de la création du deck'
+
+  /api/decks/mine:
+    get:
+      tags:
+        - decks
+      summary: Lister tous mes decks
+      description: |
+        Retourne tous les decks appartenant à l'utilisateur authentifié.
+        La liste peut être vide si l'utilisateur n'a pas encore créé de deck.
+      operationId: getMyDecks
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Liste des decks de l'utilisateur
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Deck'
+              examples:
+                default:
+                  summary: Liste de decks
+                  value:
+                    - id: 1
+                      name: Mon premier deck
+                      userId: 1
+                      deckCards: []
+                      createdAt: '2024-01-15T10:30:00Z'
+                      updatedAt: '2024-01-15T10:30:00Z'
+                empty:
+                  summary: Liste vide
+                  value: []
+        '401':
+          description: Token d'authentification manquant ou invalide
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                unauthorized:
+                  summary: Non autorisé
+                  value:
+                    error: "Vous n'êtes pas autorisé à accéder à cette route"
+        '500':
+          description: Erreur serveur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                serverError:
+                  summary: Erreur serveur
+                  value:
+                    error: 'Une erreur est survenue lors de la récupération des decks'
+
+  /api/decks/{id}:
+    get:
+      tags:
+        - decks
+      summary: Consulter un deck spécifique
+      description: |
+        Retourne les détails d'un deck spécifique par son ID.
+        L'utilisateur doit être le propriétaire du deck pour y accéder.
+      operationId: getDeckById
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identifiant du deck
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: Détails du deck
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deck'
+              examples:
+                default:
+                  summary: Deck trouvé
+                  value:
+                    id: 1
+                    name: Mon premier deck
+                    userId: 1
+                    deckCards: []
+                    createdAt: '2024-01-15T10:30:00Z'
+                    updatedAt: '2024-01-15T10:30:00Z'
+        '400':
+          description: ID de deck invalide
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalidId:
+                  summary: ID invalide
+                  value:
+                    error: 'ID de deck invalide'
+        '401':
+          description: Token d'authentification manquant ou invalide
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                unauthorized:
+                  summary: Non autorisé
+                  value:
+                    error: "Vous n'êtes pas autorisé à accéder à cette route"
+        '403':
+          description: Le deck n'appartient pas à l'utilisateur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                forbidden:
+                  summary: Accès refusé
+                  value:
+                    error: "Vous n'avez pas accès à ce deck"
+        '404':
+          description: Deck non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                notFound:
+                  summary: Deck introuvable
+                  value:
+                    error: "Le deck n'a pas été trouvé"
+        '500':
+          description: Erreur serveur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                serverError:
+                  summary: Erreur serveur
+                  value:
+                    error: 'Une erreur est survenue lors de la consultation du deck'
+
+    patch:
+      tags:
+        - decks
+      summary: Modifier un deck existant
+      description: |
+        Modifie un deck existant. Permet de changer le nom et/ou les cartes.
+        Si les cartes sont modifiées, le nouveau tableau doit contenir exactement 10 IDs valides.
+        L'utilisateur doit être le propriétaire du deck.
+      operationId: updateDeck
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identifiant du deck à modifier
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDeckRequest'
+            examples:
+              updateName:
+                summary: Modifier uniquement le nom
+                value:
+                  name: Mon deck modifié
+              updateCards:
+                summary: Modifier uniquement les cartes
+                value:
+                  cards: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+              updateBoth:
+                summary: Modifier le nom et les cartes
+                value:
+                  name: Mon deck modifié
+                  cards: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+      responses:
+        '200':
+          description: Deck modifié avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deck'
+              examples:
+                default:
+                  summary: Deck modifié
+                  value:
+                    id: 1
+                    name: Mon deck modifié
+                    userId: 1
+                    deckCards: []
+                    createdAt: '2024-01-15T10:30:00Z'
+                    updatedAt: '2024-01-15T10:35:00Z'
+        '400':
+          description: Données invalides
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalidId:
+                  summary: ID invalide
+                  value:
+                    error: 'ID de deck invalide'
+                wrongCardCount:
+                  summary: Nombre de cartes incorrect
+                  value:
+                    error: 'Les cartes doivent contenir exactement 10 IDs'
+                invalidCards:
+                  summary: Cartes invalides
+                  value:
+                    error: "Certaines cartes sont invalides ou n'existent pas"
+        '401':
+          description: Token d'authentification manquant ou invalide
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                unauthorized:
+                  summary: Non autorisé
+                  value:
+                    error: "Vous n'êtes pas autorisé à accéder à cette route"
+        '403':
+          description: Le deck n'appartient pas à l'utilisateur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                forbidden:
+                  summary: Accès refusé
+                  value:
+                    error: "Vous n'avez pas accès à ce deck"
+        '404':
+          description: Deck non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                notFound:
+                  summary: Deck introuvable
+                  value:
+                    error: "Le deck n'a pas été trouvé"
+        '500':
+          description: Erreur serveur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                serverError:
+                  summary: Erreur serveur
+                  value:
+                    error: 'Une erreur est survenue lors de la modification du deck'
+
+    delete:
+      tags:
+        - decks
+      summary: Supprimer un deck
+      description: |
+        Supprime un deck et toutes ses associations de cartes.
+        L'utilisateur doit être le propriétaire du deck.
+        Cette action est irréversible.
+      operationId: deleteDeck
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identifiant du deck à supprimer
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: Deck supprimé avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteDeckResponse'
+              examples:
+                default:
+                  summary: Confirmation de suppression
+                  value:
+                    message: 'Le deck a été supprimé avec succès'
+        '400':
+          description: ID de deck invalide
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalidId:
+                  summary: ID invalide
+                  value:
+                    error: 'ID de deck invalide'
+        '401':
+          description: Token d'authentification manquant ou invalide
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                unauthorized:
+                  summary: Non autorisé
+                  value:
+                    error: "Vous n'êtes pas autorisé à accéder à cette route"
+        '403':
+          description: Le deck n'appartient pas à l'utilisateur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                forbidden:
+                  summary: Accès refusé
+                  value:
+                    error: "Vous n'avez pas accès à ce deck"
+        '404':
+          description: Deck non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                notFound:
+                  summary: Deck introuvable
+                  value:
+                    error: "Le deck n'a pas été trouvé"
+        '500':
+          description: Erreur serveur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                serverError:
+                  summary: Erreur serveur
+                  value:
+                    error: 'Une erreur est survenue lors de la suppression du deck'
