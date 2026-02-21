@@ -2,10 +2,12 @@ import { createServer } from 'http'
 import { env } from './env'
 import express from 'express'
 import cors from 'cors'
+import { Server } from 'socket.io'
 import { authRouter } from './routes/auth.routes'
 import { cardsRouter } from './routes/cards.routes'
 import { decksRouter } from './routes/decks.routes'
 import { setupSwagger } from './config/swagger'
+import { socketAuthMiddleware } from './middlewares/socketAuth.middleware'
 
 // Create Express app
 export const app = express()
@@ -58,10 +60,14 @@ app.get('/api/health', (_req, res) => {
 
 // Start server only if this file is run directly (not imported for tests)
 if (require.main === module) {
-  // Create HTTP server
   const httpServer = createServer(app)
+  const io = new Server(httpServer)
 
-  // Start server
+  io.use(socketAuthMiddleware)
+  io.on('connection', (_socket) => {
+    // _socket.data.userId et _socket.data.email sont définis par le middleware après auth réussie
+  })
+
   try {
     httpServer.listen(env.PORT, '0.0.0.0', () => {
       console.log(`\n🚀 Server is running on http://0.0.0.0:${env.PORT}`)
