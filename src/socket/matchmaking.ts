@@ -15,6 +15,12 @@ export interface WaitingRoom {
 const rooms = new Map<number, WaitingRoom>()
 let nextRoomId = 1
 
+/** Réinitialise l'état du matchmaking (pour les tests). */
+export function resetMatchmakingState(): void {
+  rooms.clear()
+  nextRoomId = 1
+}
+
 function getSocketRoomName(id: number): string {
   return `room-${id}`
 }
