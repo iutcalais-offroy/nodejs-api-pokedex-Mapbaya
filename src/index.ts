@@ -8,6 +8,17 @@ import { cardsRouter } from './routes/cards.routes'
 import { decksRouter } from './routes/decks.routes'
 import { setupSwagger } from './config/swagger'
 import { socketAuthMiddleware } from './middlewares/socketAuth.middleware'
+import {
+  createRoom as createRoomInStore,
+  getRoomsList,
+  getRoom,
+  removeRoom,
+  validateDeck,
+  getNextRoomId,
+  buildInitialHands,
+  getSocketRoomNameExport,
+} from './socket/matchmaking'
+import { prisma } from './database'
 
 // Create Express app
 export const app = express()
@@ -64,8 +75,109 @@ if (require.main === module) {
   const io = new Server(httpServer)
 
   io.use(socketAuthMiddleware)
-  io.on('connection', (_socket) => {
-    // _socket.data.userId et _socket.data.email sont définis par le middleware après auth réussie
+  io.on('connection', (socket) => {
+    const userId = socket.data.userId as number
+    if (userId == null) return
+
+    socket.on('createRoom', async (payload: { deckId?: number }) => {
+      const deckId = payload?.deckId != null ? Number(payload.deckId) : NaN
+      const validated = await validateDeck(userId, deckId)
+      if (!validated.ok) {
+        socket.emit('error', { message: validated.error })
+        return
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { username: true },
+      })
+      const hostUsername = user?.username ?? ''
+
+      const roomId = getNextRoomId()
+      const socketRoomName = getSocketRoomNameExport(roomId)
+      createRoomInStore({
+        roomId,
+        hostUserId: userId,
+        hostUsername,
+        hostSocketId: socket.id,
+        deckId: validated.deck.id,
+      })
+      socket.join(socketRoomName)
+
+      socket.emit('roomCreated', {
+        id: roomId,
+        hostUsername,
+        deckId: validated.deck.id,
+      })
+      io.emit('roomsListUpdated', getRoomsList())
+    })
+
+    socket.on('getRooms', () => {
+      socket.emit('roomsList', getRoomsList())
+    })
+
+    socket.on(
+      'joinRoom',
+      async (payload: { roomId?: number; deckId?: number }) => {
+        const roomId = payload?.roomId != null ? Number(payload.roomId) : NaN
+        const deckId = payload?.deckId != null ? Number(payload.deckId) : NaN
+        if (isNaN(roomId)) {
+          socket.emit('error', { message: 'Room invalide' })
+          return
+        }
+
+        const validated = await validateDeck(userId, deckId)
+        if (!validated.ok) {
+          socket.emit('error', { message: validated.error })
+          return
+        }
+
+        const room = getRoom(roomId)
+        if (!room) {
+          socket.emit('error', { message: "La room n'existe pas" })
+          return
+        }
+        if (room.hostSocketId === socket.id) {
+          socket.emit('error', {
+            message: 'Vous êtes déjà le host de cette room',
+          })
+          return
+        }
+
+        const hostDeck = await prisma.deck.findFirst({
+          where: { id: room.deckId, userId: room.hostUserId },
+          include: { deckCards: { include: { card: true } } },
+        })
+        if (!hostDeck || hostDeck.deckCards.length !== 10) {
+          socket.emit('error', { message: 'Deck du host invalide' })
+          return
+        }
+
+        const { hand1, hand2 } = buildInitialHands(
+          hostDeck.deckCards,
+          validated.deck.deckCards as { card: unknown }[],
+        )
+
+        removeRoom(roomId)
+        socket.join(room.socketRoomName)
+
+        const hostSocket = io.sockets.sockets.get(room.hostSocketId)
+        if (hostSocket) {
+          hostSocket.emit('gameStarted', {
+            roomId,
+            myHand: hand1,
+            opponentHandCount: 5,
+          })
+        }
+        socket.emit('gameStarted', {
+          roomId,
+          myHand: hand2,
+          opponentHandCount: 5,
+        })
+
+        io.emit('roomsListUpdated', getRoomsList())
+      },
+    )
   })
 
   try {
