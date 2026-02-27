@@ -3,8 +3,8 @@
 Ce projet est une API REST pour un jeu de cartes Pokemon en ligne avec système de jeu en temps réel. Il utilise *
 *Express**, **TypeScript**, **Prisma ORM**, **PostgreSQL** et **Socket.io**.
 
-**Le projet est disponible
-**[Voir le guide d'utilisation](GUIDE_UTILISATION.md)
+**Le projet est disponible ** :
+[Voir le guide d'utilisation](GUIDE_UTILISATION.md)
 
 Ce README vous guidera à travers le setup complet du projet et les différentes fonctionnalités à implémenter.
 
