@@ -37,18 +37,15 @@ COPY --from=builder /app/src/generated ./src/generated
 # Copy Prisma schema, config, and data for migrations and seed
 # Copy entire prisma directory from builder (includes data folder)
 COPY --from=builder /app/prisma ./prisma
-# Verify prisma/data exists (debug)
-RUN ls -la ./prisma/data/ || echo "prisma/data directory not found"
-RUN ls -la ./prisma/data/pokemon.json || echo "pokemon.json not found"
 COPY prisma.config.ts ./
 
-<<<<<<< HEAD
-=======
 # Copy Swagger documentation files
 COPY swagger.config.yml ./
 COPY docs ./docs
 
->>>>>>> origin/main
+# Ensure prisma/data exists and copy pokemon.json for seed in production
+RUN mkdir -p ./prisma/data
+COPY prisma/data/pokemon.json ./prisma/data/pokemon.json
 # Copy public directory for static files
 COPY public ./public
 
