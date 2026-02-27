@@ -409,7 +409,7 @@ export function applyEndTurn(
     return { ok: false, error: result.error }
   }
 
-  const { game, player, opponent } = result
+  const { game, opponent } = result
 
   if (game.winnerSocketId) {
     return { ok: false, error: 'La partie est déjà terminée' }
