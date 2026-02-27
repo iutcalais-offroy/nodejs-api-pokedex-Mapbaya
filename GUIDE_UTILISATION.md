@@ -92,23 +92,5 @@ Une version déployée est disponible à l’adresse :
 
 Le fonctionnement est similaire à la version locale, mais la base de données et le seed sont gérés via Docker + Prisma dans le conteneur.
 
----
 
-## 3. Fichiers sensibles à ne pas committer
-
-- `/.env` (mots de passe, secrets, URL de BDD)
-- Toute clé privée, token ou mot de passe en clair
-
-Dans ce projet :
-
-- `.env` est **déjà ignoré** par Git (présent dans `.gitignore`).
-- Seul `.env.example` est versionné, avec des valeurs d’exemple.
-
-Avant de pousser sur GitHub, vérifier que tout est OK :
-
-```bash
-git status
-```
-
-Le fichier `.env` ne doit pas apparaître dans la liste des fichiers suivis.
 
