@@ -201,9 +201,15 @@ export function getGameState(roomId: number): GameState | undefined {
 function requireGameAndPlayer(
   roomId: number,
   playerSocketId: string,
-): { game: GameState; player: PlayerGameState; opponent: PlayerGameState } | {
-  error: string
-} {
+):
+  | {
+      game: GameState
+      player: PlayerGameState
+      opponent: PlayerGameState
+    }
+  | {
+      error: string
+    } {
   const game = gameStates.get(roomId)
   if (!game) {
     return { error: 'La partie nexiste pas' }

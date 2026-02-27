@@ -117,9 +117,7 @@ describe('matchmaking', () => {
       const result = await validateDeck(1, 42)
       expect(result.ok).toBe(false)
       if (!result.ok)
-        expect(result.error).toBe(
-          'Le deck doit contenir exactement 10 cartes',
-        )
+        expect(result.error).toBe('Le deck doit contenir exactement 10 cartes')
     })
 
     it('retourne erreur si le deck a plus de 10 cartes', async () => {
@@ -134,9 +132,7 @@ describe('matchmaking', () => {
       const result = await validateDeck(1, 42)
       expect(result.ok).toBe(false)
       if (!result.ok)
-        expect(result.error).toBe(
-          'Le deck doit contenir exactement 10 cartes',
-        )
+        expect(result.error).toBe('Le deck doit contenir exactement 10 cartes')
     })
 
     it('retourne ok et le deck si valide (10 cartes, bon user)', async () => {
@@ -413,7 +409,7 @@ describe('matchmaking', () => {
       expect(updated.winnerSocketId).toBe(hostSocketId)
     })
 
-    it("applyAttack peut mettre KO sans atteindre immédiatement le score de victoire", () => {
+    it('applyAttack peut mettre KO sans atteindre immédiatement le score de victoire', () => {
       const game = createGame()
       const host = game.players[hostSocketId]
       const guest = game.players[guestSocketId]

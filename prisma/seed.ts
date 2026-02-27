@@ -60,11 +60,6 @@ async function main() {
     join(process.cwd(), 'prisma', 'data', 'pokemon.json'),
     join(process.cwd(), 'data', 'pokemon.json'),
   ]
-<<<<<<< HEAD
-  
-=======
-
->>>>>>> origin/main
   let pokemonDataPath: string | null = null
   for (const path of possiblePaths) {
     try {
@@ -75,21 +70,11 @@ async function main() {
       // Continue to next path
     }
   }
-<<<<<<< HEAD
-  
-=======
-
->>>>>>> origin/main
   if (!pokemonDataPath) {
     throw new Error(
       `pokemon.json not found. Tried: ${possiblePaths.join(', ')}`,
     )
   }
-<<<<<<< HEAD
-  
-=======
-
->>>>>>> origin/main
   const pokemonJson = readFileSync(pokemonDataPath, 'utf-8')
   const pokemonData: CardModel[] = JSON.parse(pokemonJson)
 
