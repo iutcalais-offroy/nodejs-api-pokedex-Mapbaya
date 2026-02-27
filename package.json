@@ -1,7 +1,7 @@
 {
   "name": "template-tcg-api",
   "version": "1.0.0",
-  "author": "",
+  "author": "https://nodejs-api-pokedex-mapbaya-production.up.railway.app",
   "description": "TCG Pokemon-like Backend Server",
   "main": "dist/index.js",
   "scripts": {
