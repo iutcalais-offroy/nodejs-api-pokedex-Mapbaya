@@ -58,7 +58,7 @@ if (require.main === module) {
 
   // Start server
   try {
-    httpServer.listen(env.PORT, '0.0.0.0', () => {
+    httpServer.listen(Number(env.PORT), '0.0.0.0', () => {
       console.log(`\n🚀 Server is running on http://0.0.0.0:${env.PORT}`)
       console.log(
         `🧪 Socket.io Test Client available at http://0.0.0.0:${env.PORT}`,
