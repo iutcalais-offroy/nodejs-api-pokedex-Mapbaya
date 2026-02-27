@@ -15,8 +15,14 @@ import {
   removeRoom,
   validateDeck,
   getNextRoomId,
-  buildInitialHands,
   getSocketRoomNameExport,
+  startGame,
+  getGameState,
+  getGameStateViewForPlayer,
+  applyDrawCards,
+  applyPlayCard,
+  applyAttack,
+  applyEndTurn,
 } from './socket/matchmaking'
 import { prisma } from './database'
 
@@ -153,31 +159,167 @@ if (require.main === module) {
           return
         }
 
-        const { hand1, hand2 } = buildInitialHands(
-          hostDeck.deckCards,
-          validated.deck.deckCards as { card: unknown }[],
-        )
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { username: true },
+        })
+
+        const guestUsername = user?.username ?? ''
+
+        const game = startGame({
+          roomId,
+          socketRoomName: room.socketRoomName,
+          hostSocketId: room.hostSocketId,
+          hostUserId: room.hostUserId,
+          hostUsername: room.hostUsername,
+          hostDeckCards: hostDeck.deckCards,
+          guestSocketId: socket.id,
+          guestUserId: userId,
+          guestUsername,
+          guestDeckCards: validated.deck.deckCards as { card: unknown }[],
+        })
 
         removeRoom(roomId)
         socket.join(room.socketRoomName)
 
         const hostSocket = io.sockets.sockets.get(room.hostSocketId)
         if (hostSocket) {
-          hostSocket.emit('gameStarted', {
-            roomId,
-            myHand: hand1,
-            opponentHandCount: 5,
-          })
+          const hostView = getGameStateViewForPlayer(
+            game.roomId,
+            room.hostSocketId,
+          )
+          if (hostView) {
+            hostSocket.emit('gameStarted', hostView)
+          }
         }
-        socket.emit('gameStarted', {
-          roomId,
-          myHand: hand2,
-          opponentHandCount: 5,
-        })
+
+        const guestView = getGameStateViewForPlayer(game.roomId, socket.id)
+        if (guestView) {
+          socket.emit('gameStarted', guestView)
+        }
 
         io.emit('roomsListUpdated', getRoomsList())
       },
     )
+
+    socket.on('drawCards', (payload: { roomId?: number }) => {
+      const roomId = payload?.roomId != null ? Number(payload.roomId) : NaN
+      if (Number.isNaN(roomId)) {
+        socket.emit('error', { message: 'Room invalide' })
+        return
+      }
+
+      const result = applyDrawCards(roomId, socket.id)
+      if (!result.ok) {
+        socket.emit('error', { message: result.error })
+        return
+      }
+
+      const game = getGameState(roomId)
+      if (!game) return
+
+      Object.keys(game.players).forEach((socketId) => {
+        const target = io.sockets.sockets.get(socketId)
+        const view = getGameStateViewForPlayer(roomId, socketId)
+        if (target && view) {
+          target.emit('gameStateUpdated', view)
+        }
+      })
+    })
+
+    socket.on(
+      'playCard',
+      (payload: { roomId?: number; cardIndex?: number }) => {
+        const roomId = payload?.roomId != null ? Number(payload.roomId) : NaN
+        const cardIndex =
+          payload?.cardIndex != null ? Number(payload.cardIndex) : NaN
+
+        if (Number.isNaN(roomId)) {
+          socket.emit('error', { message: 'Room invalide' })
+          return
+        }
+
+        const result = applyPlayCard(roomId, socket.id, cardIndex)
+        if (!result.ok) {
+          socket.emit('error', { message: result.error })
+          return
+        }
+
+        const game = getGameState(roomId)
+        if (!game) return
+
+        Object.keys(game.players).forEach((socketId) => {
+          const target = io.sockets.sockets.get(socketId)
+          const view = getGameStateViewForPlayer(roomId, socketId)
+          if (target && view) {
+            target.emit('gameStateUpdated', view)
+          }
+        })
+      },
+    )
+
+    socket.on('attack', (payload: { roomId?: number }) => {
+      const roomId = payload?.roomId != null ? Number(payload.roomId) : NaN
+      if (Number.isNaN(roomId)) {
+        socket.emit('error', { message: 'Room invalide' })
+        return
+      }
+
+      const result = applyAttack(roomId, socket.id)
+      if (!result.ok) {
+        socket.emit('error', { message: result.error })
+        return
+      }
+
+      const game = getGameState(roomId)
+      if (!game) return
+
+      Object.keys(game.players).forEach((socketId) => {
+        const target = io.sockets.sockets.get(socketId)
+        const view = getGameStateViewForPlayer(roomId, socketId)
+        if (target && view) {
+          target.emit('gameStateUpdated', view)
+        }
+      })
+
+      if (result.winnerSocketId) {
+        Object.keys(game.players).forEach((socketId) => {
+          const target = io.sockets.sockets.get(socketId)
+          const view = getGameStateViewForPlayer(roomId, socketId)
+          if (target && view) {
+            target.emit('gameEnded', {
+              ...view,
+              winnerSocketId: result.winnerSocketId,
+            })
+          }
+        })
+      }
+    })
+
+    socket.on('endTurn', (payload: { roomId?: number }) => {
+      const roomId = payload?.roomId != null ? Number(payload.roomId) : NaN
+      if (Number.isNaN(roomId)) {
+        socket.emit('error', { message: 'Room invalide' })
+        return
+      }
+
+      const result = applyEndTurn(roomId, socket.id)
+      if (!result.ok) {
+        socket.emit('error', { message: result.error })
+        return
+      }
+
+      const game = getGameState(roomId)
+      if (!game) return
+
+      Object.keys(game.players).forEach((socketId) => {
+        const target = io.sockets.sockets.get(socketId)
+        const view = getGameStateViewForPlayer(roomId, socketId)
+        if (target && view) {
+          target.emit('gameStateUpdated', view)
+        }
+      })
+    })
   })
 
   try {
