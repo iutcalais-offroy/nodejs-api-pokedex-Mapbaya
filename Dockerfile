@@ -42,10 +42,13 @@ RUN ls -la ./prisma/data/ || echo "prisma/data directory not found"
 RUN ls -la ./prisma/data/pokemon.json || echo "pokemon.json not found"
 COPY prisma.config.ts ./
 
+<<<<<<< HEAD
+=======
 # Copy Swagger documentation files
 COPY swagger.config.yml ./
 COPY docs ./docs
 
+>>>>>>> origin/main
 # Copy public directory for static files
 COPY public ./public
 
