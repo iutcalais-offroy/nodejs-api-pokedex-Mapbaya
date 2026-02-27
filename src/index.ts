@@ -65,10 +65,7 @@ app.get('/', (_req, res) => {
       auth: '/api/auth',
       cards: '/api/cards',
       decks: '/api/decks',
-<<<<<<< HEAD
-=======
       docs: '/api-docs',
->>>>>>> origin/main
     },
   })
 })
@@ -326,11 +323,7 @@ if (require.main === module) {
   })
 
   try {
-<<<<<<< HEAD
     httpServer.listen(Number(env.PORT), '0.0.0.0', () => {
-=======
-    httpServer.listen(env.PORT, '0.0.0.0', () => {
->>>>>>> origin/main
       console.log(`\n🚀 Server is running on http://0.0.0.0:${env.PORT}`)
       console.log(
         `🧪 Socket.io Test Client available at http://0.0.0.0:${env.PORT}`,
